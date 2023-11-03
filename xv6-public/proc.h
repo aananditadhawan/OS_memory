@@ -52,6 +52,7 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   struct map *mapping[32];     // Mapping for the memory page table
+  int lastUsedIdx;             // Last index for mapping
 };
 
 // Process memory is laid out contiguously, low addresses first:

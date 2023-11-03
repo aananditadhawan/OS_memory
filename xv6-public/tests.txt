@@ -1,0 +1,671 @@
+starting build
+
+**********************************************************************
+
+Test build
+build xv6 using make
+
+**********************************************************************
+Trying to build project using make
+make xv6.img fs.img
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie -fno-pic -O -nostdinc -I. -c bootmain.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie -fno-pic -nostdinc -I. -c bootasm.S
+ld -m    elf_i386 -N -e start -Ttext 0x7C00 -o bootblock.o bootasm.o bootmain.o
+objdump -S bootblock.o > bootblock.asm
+objcopy -S -O binary -j .text bootblock.o bootblock
+./sign.pl bootblock
+boot block is 451 bytes (max 510)
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o bio.o bio.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o console.o console.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o exec.o exec.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o file.o file.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o fs.o fs.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o ide.o ide.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o ioapic.o ioapic.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o kalloc.o kalloc.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o kbd.o kbd.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o lapic.o lapic.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o log.o log.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o main.o main.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o mp.o mp.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o picirq.o picirq.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o pipe.o pipe.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o proc.o proc.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sleeplock.o sleeplock.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o spinlock.o spinlock.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o string.o string.c
+gcc -m32 -gdwarf-2 -Wa,-divide   -c -o swtch.o swtch.S
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o syscall.o syscall.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysfile.o sysfile.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test build FAILED
+ (build xv6 using make)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_1
+
+**********************************************************************
+
+Test test_1
+Simple mmap with MAP_ANON | MAP_FIXED
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_1.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_1 FAILED (0 of 1)
+ (Simple mmap with MAP_ANON | MAP_FIXED)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_2
+
+**********************************************************************
+
+Test test_2
+Simple mmap/munmap with MAP_ANON | MAP_FIXED
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_2.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_2 FAILED (0 of 1)
+ (Simple mmap/munmap with MAP_ANON | MAP_FIXED)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_3
+
+**********************************************************************
+
+Test test_3
+Access the mmap memory allocated with MAP_ANON | MAP_FIXED, then munmap
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_3.c
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+Trying to build project using make
+make xv6.img fs.img
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_3 FAILED (0 of 1)
+ (Access the mmap memory allocated with MAP_ANON | MAP_FIXED, then munmap)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_4
+
+**********************************************************************
+
+Test test_4
+Try mmap MAP_ANON without MAP_FIXED
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_4.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_4 FAILED (0 of 1)
+ (Try mmap MAP_ANON without MAP_FIXED)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_5
+
+**********************************************************************
+
+Test test_5
+Try to allocate memory with MAP_FIXED at an illegal address
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_5.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_5 FAILED (0 of 1)
+ (Try to allocate memory with MAP_FIXED at an illegal address)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_6
+
+**********************************************************************
+
+Test test_6
+mmap a file
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_6.c
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+Trying to build project using make
+make xv6.img fs.img
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_6 FAILED (0 of 1)
+ (mmap a file)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_7
+
+**********************************************************************
+
+Test test_7
+Changes to the mmapped memory should be reflected in file after munmap
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_7.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_7 FAILED (0 of 1)
+ (Changes to the mmapped memory should be reflected in file after munmap)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_8
+
+**********************************************************************
+
+Test test_8
+MAP_GROWSUP that adds a single page to anonymous mapping
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_8.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_8 FAILED (0 of 1)
+ (MAP_GROWSUP that adds a single page to anonymous mapping)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_9
+
+**********************************************************************
+
+Test test_9
+MAP_GROWSUP with file-backed mapping
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_9.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_9 FAILED (0 of 1)
+ (MAP_GROWSUP with file-backed mapping)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_10
+
+**********************************************************************
+
+Test test_10
+Try growing memory without MAP_GROWSUP - should segfault
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_10.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_10 FAILED (0 of 1)
+ (Try growing memory without MAP_GROWSUP - should segfault)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_11
+
+**********************************************************************
+
+Test test_11
+Two MAP_GROWSUP mappings with a single guard page in between - the lower should not extend
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_11.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_11 FAILED (0 of 1)
+ (Two MAP_GROWSUP mappings with a single guard page in between - the lower should not extend)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_12
+
+**********************************************************************
+
+Test test_12
+Child access to parent mmap
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_12.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_12 FAILED (0 of 1)
+ (Child access to parent mmap)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_13
+
+**********************************************************************
+
+Test test_13
+Changes made to mmapped memory should not be reflected in file when MAP_PRIVATE is set
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_13.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_13 FAILED (0 of 1)
+ (Changes made to mmapped memory should not be reflected in file when MAP_PRIVATE is set)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_14
+
+**********************************************************************
+
+Test test_14
+Child should access file data with MAP_PRIVATE flag
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_14.c
+Trying to build project using make
+/tmp/tmpt2avu6uu/p/Makefile
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_14 FAILED (0 of 1)
+ (Child should access file data with MAP_PRIVATE flag)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+starting test_15
+
+**********************************************************************
+
+Test test_15
+Parent should not see child mofications to memory with MAP_PRIVATE
+
+**********************************************************************
+Running xv6 user progam /home/cs537-1/tests/P5/ctests/test_15.c
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpt2avu6uu/p/Makefile
+/tmp/tmpt2avu6uu/p/Makefile.test
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+sysproc.c: In function ‘sys_mmap’:
+sysproc.c:167:16: error: redefinition of ‘curproc’
+  167 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:159:16: note: previous definition of ‘curproc’ with type ‘struct proc *’
+  159 |   struct proc *curproc = myproc();
+      |                ^~~~~~~
+sysproc.c:179:32: error: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Werror=int-conversion]
+  179 |       curproc->mapping[i]->addr=addr;
+      |                                ^
+cc1: all warnings being treated as errors
+make: *** [<builtin>: sysproc.o] Error 1
+
+
+test test_15 FAILED (0 of 1)
+ (Parent should not see child mofications to memory with MAP_PRIVATE)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+**********************************************************************
+Summary:
+test build FAILED
+ (build xv6 using make)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_1 FAILED (0 of 1)
+ (Simple mmap with MAP_ANON | MAP_FIXED)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_2 FAILED (0 of 1)
+ (Simple mmap/munmap with MAP_ANON | MAP_FIXED)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_3 FAILED (0 of 1)
+ (Access the mmap memory allocated with MAP_ANON | MAP_FIXED, then munmap)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_4 FAILED (0 of 1)
+ (Try mmap MAP_ANON without MAP_FIXED)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_5 FAILED (0 of 1)
+ (Try to allocate memory with MAP_FIXED at an illegal address)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_6 FAILED (0 of 1)
+ (mmap a file)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_7 FAILED (0 of 1)
+ (Changes to the mmapped memory should be reflected in file after munmap)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_8 FAILED (0 of 1)
+ (MAP_GROWSUP that adds a single page to anonymous mapping)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_9 FAILED (0 of 1)
+ (MAP_GROWSUP with file-backed mapping)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_10 FAILED (0 of 1)
+ (Try growing memory without MAP_GROWSUP - should segfault)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_11 FAILED (0 of 1)
+ (Two MAP_GROWSUP mappings with a single guard page in between - the lower should not extend)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_12 FAILED (0 of 1)
+ (Child access to parent mmap)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_13 FAILED (0 of 1)
+ (Changes made to mmapped memory should not be reflected in file when MAP_PRIVATE is set)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_14 FAILED (0 of 1)
+ (Child should access file data with MAP_PRIVATE flag)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+test test_15 FAILED (0 of 1)
+ (Parent should not see child mofications to memory with MAP_PRIVATE)
+ make failed (error 2)
+ required file 'xv6.img' does not exist after make
+ required file 'fs.img' does not exist after make
+
+Passed 0 of 16 tests.
+Overall 0 of 16
+Points 0 of 15
