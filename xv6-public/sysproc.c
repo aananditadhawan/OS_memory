@@ -6,7 +6,6 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
-//#include "mmap.h"
 
 int
 sys_fork(void)
@@ -195,5 +194,40 @@ int sys_mmap(void) {
 
 int sys_munmap(void) {
 
-  
+  int addr, length;
+  if(argint(0, &addr) < 0 || argint(1, &length) < 0)
+    return -1;
+
+  // Check if address is within valid range (similar check as in sys_mmap)
+  if(addr < 0x60000000 || addr > 0x80000000)
+    return -1;
+
+  struct proc *curproc = myproc();
+
+  // Calculate the number of pages to remove based on the provided length.
+  int pages = PGROUNDUP(length) / PGSIZE;
+
+  for(int i = 0; i < pages; i++) {
+    char* va = (char*)(addr + i*PGSIZE);
+    pte_t *pte;
+    int pa;
+
+    // Get the page table entry
+    pte = walkpgdir(curproc->pgdir, va, 0);
+    if(!pte || (*pte & PTE_P) == 0) {
+      continue; // No mapping exists for this page.
+    }
+
+    pa = PTE_ADDR(*pte);
+
+    // Deallocate the physical page.
+    kfree((char*)P2V(pa));
+
+    // Clear the page table entry
+    *pte = 0;
+
+  }
+
+  return 0;
 }
+
