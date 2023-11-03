@@ -157,6 +157,39 @@ int sys_mmap(void) {
   if(addr < 0x60000000 || addr > 0x80000000)
     //return (void*)-1;
     return -1;
+  
+  struct proc *curproc = myproc();
+  //int pages = 
+  if((flags & MAP_FIXED) != MAP_FIXED){
+    int straddr = 0x60000000;
+    if(((int)curproc->mapping[0]->addr - 0x60000000) > length){
+      // map at the beginning
+      curproc->mapping[curproc->mapidx]->addr = (void *)straddr;
+      curproc->mapping[curproc->mapidx]->length = length;
+      curproc->mapping[curproc->mapidx]->prot = prot;
+      curproc->mapping[curproc->mapidx]->flags = flags;
+      curproc->mapping[curproc->mapidx]->fd = fd;
+      curproc->mapping[curproc->mapidx]->offset = offset;
+      curproc->mapidx++;
+    } else{
+      for(int i = 0; i < 30; i++){
+        if(curproc->mapping[i]->addr != NULL){
+	  straddr = (int)curproc->mapping[i]->addr + curproc->mapping[i]->length;
+	  int dif = (int)curproc->mapping[i+1]->addr - length;
+	  if(dif > straddr){
+	    // map
+	    curproc->mapping[curproc->mapidx]->addr = (void *)straddr;
+            curproc->mapping[curproc->mapidx]->length = length;
+            curproc->mapping[curproc->mapidx]->prot = prot;
+            curproc->mapping[curproc->mapidx]->flags = flags;
+            curproc->mapping[curproc->mapidx]->fd = fd;
+            curproc->mapping[curproc->mapidx]->offset = offset;
+            curproc->mapidx++;
+	  }
+        }
+      }      
+    }
+  }
 
   //return 0;
 
@@ -164,8 +197,6 @@ int sys_mmap(void) {
   //int pages = PGROUNDUP(length);
 
   char *mem = kalloc();
-
-  struct proc *curproc = myproc();
 
   if(mappages(curproc->pgdir, (void*)addr, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
     cprintf("allocuvm out of memory (2)\n");
