@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include <stddef.h>
 
 struct {
   struct spinlock lock;
@@ -88,6 +89,15 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->mapidx = 0;
+  for(int i = 0; i < 32; i++){
+    p->mapping[i]->addr = NULL;
+    p->mapping[i]->length = 0;
+    p->mapping[i]->prot = 0;
+    p->mapping[i]->flags = 0;
+    p->mapping[i]->fd = 0;
+    p->mapping[i]->offset = 0;
+  }
 
   release(&ptable.lock);
 

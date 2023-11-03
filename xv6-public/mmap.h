@@ -12,9 +12,10 @@
 
 struct map {
     void *addr;
-    int length; 
+    int length;
     int prot;
-    int flags; 
+    int flags;
     int fd;
     int offset;
+    struct file *file;
 };
