@@ -275,9 +275,11 @@ int sys_munmap(void) {
             // file->off = 0;
             // curproc->ofile[fd] = file;
             //curproc->ofile[fd]->off = 0;
-            int rv;
-            rv = filewrite(curproc->ofile[fd], (char *)addr, length);
-            cprintf("return value of file write is %d\n", rv);  
+            if((curproc->mapping[i]->flags & MAP_SHARED) == MAP_SHARED) {
+              int rv;
+              rv = filewrite(curproc->ofile[fd], (char *)addr, length);
+              cprintf("return value of file write is %d\n", rv);  
+            }
             break; 
           }
         }

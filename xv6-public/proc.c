@@ -214,12 +214,9 @@ fork(void)
 
   // Copy mmap entries
   for(i = 0; i < 32; i++) {
-    if(curproc->mapping[i]->addr != 0) {
+    if(i<=curproc->lastUsedIdx && curproc->mapping[i]->addr != 0 && (curproc->mapping[i]->flags & MAP_SHARED) == MAP_SHARED) {
       np->mapping[i] = curproc->mapping[i];
-      np->ref_cnt++;
-      if(np->mapping[i]->fd != -1) {
-        filedup(curproc->ofile[np->mapping[i]->fd]);
-      }
+      //np->ref_cnt++;
     }
   }
 
@@ -296,123 +293,14 @@ exit(void)
     }
   }
 
-  // Unmap all memory mappings.
-  /*for(int i = 0; i < 32; i++) {
-    if(curproc->mapping[i]->addr != 0) {
-      int start = PGROUNDDOWN((int)curproc->mapping[i]->addr);
-      int end = PGROUNDUP((int)curproc->mapping[i]->addr + curproc->mapping[i]->length);
+  // Unmap everything basically
+  curproc->lastUsedIdx = -1;
 
-      for(int a = start; a < end; a += PGSIZE) {
-        pte_t *pte = walkpgdir(curproc->pgdir, (char*)a, 0);
-        if(pte && (*pte & PTE_P)) {
-          char *pa = (char*)P2V(PTE_ADDR(*pte));
-          kfree(pa);
-          *pte = 0;
-        }
-      }
-
-      // Reset the mapping entry.
-      memset(&curproc->mapping[i], 0, sizeof(struct map));
-    }
-  }*/
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
   sched();
   panic("zombie exit");
 }	
-	
-	
-	
-	
-	/*int
-fork(void)
-{
-  int i, pid;
-  struct proc *np;
-  struct proc *curproc = myproc();
-
-  // Allocate process.
-  if((np = allocproc()) == 0){
-    return -1;
-  }
-
-  // Copy process state from proc.
-  if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0){
-    kfree(np->kstack);
-    np->kstack = 0;
-    np->state = UNUSED;
-    return -1;
-  }
-  np->sz = curproc->sz;
-  np->parent = curproc;
-  *np->tf = *curproc->tf;
-
-  // Clear %eax so that fork returns 0 in the child.
-  np->tf->eax = 0;
-
-  for(i = 0; i < NOFILE; i++)
-    if(curproc->ofile[i])
-      np->ofile[i] = filedup(curproc->ofile[i]);
-  np->cwd = idup(curproc->cwd);
-
-  safestrcpy(np->name, curproc->name, sizeof(curproc->name));
-
-  pid = np->pid;
-
-  acquire(&ptable.lock);
-
-  np->state = RUNNABLE;
-
-  release(&ptable.lock);
-
-  return pid;
-}
-
-// Exit the current process.  Does not return.
-// An exited process remains in the zombie state
-// until its parent calls wait() to find out it exited.
-void
-exit(void)
-{
-  struct proc *curproc = myproc();
-  struct proc *p;
-  int fd;
-
-  if(curproc == initproc)
-    panic("init exiting");
-
-  // Close all open files.
-  for(fd = 0; fd < NOFILE; fd++){
-    if(curproc->ofile[fd]){
-      fileclose(curproc->ofile[fd]);
-      curproc->ofile[fd] = 0;
-    }
-  }
-
-  begin_op();
-  iput(curproc->cwd);
-  end_op();
-  curproc->cwd = 0;
-
-  acquire(&ptable.lock);
-
-  // Parent might be sleeping in wait().
-  wakeup1(curproc->parent);
-
-  // Pass abandoned children to init.
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->parent == curproc){
-      p->parent = initproc;
-      if(p->state == ZOMBIE)
-        wakeup1(initproc);
-    }
-  }
-
-  // Jump into the scheduler, never to return.
-  curproc->state = ZOMBIE;
-  sched();
-  panic("zombie exit");
-}*/
 
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
