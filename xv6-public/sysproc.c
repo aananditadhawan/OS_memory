@@ -7,6 +7,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include <stddef.h>
+//#include "file.h"
 
 int
 sys_fork(void)
@@ -147,10 +148,6 @@ int sys_mmap(void) {
   cprintf("what did we get ? addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", 
   addr, length, prot, flags, fd, offset);
 
-  // if((flags & MAP_ANON) != MAP_ANON) {
-  //   // Do file based memory mapping
-  // }
-
   // if((flags & (MAP_ANONYMOUS | MAP_FIXED | MAP_SHARED)) != (MAP_ANONYMOUS | MAP_FIXED | MAP_SHARED))
   //   return -1;
 
@@ -192,16 +189,9 @@ int sys_mmap(void) {
         }
       }      
     }
-
-    // curproc->mapping[chosenIdx]->addr = (void *)addr;
-    // curproc->mapping[chosenIdx]->length = length;
-    // curproc->mapping[chosenIdx]->prot = prot;
-    // curproc->mapping[chosenIdx]->flags = flags;
-    // curproc->mapping[chosenIdx]->fd = fd;
-    // curproc->mapping[chosenIdx]->offset = offset;
   }
 
-  char *mem = kalloc();
+  char *mem = kalloc(); // needed for file backed as well
 
   if(mappages(curproc->pgdir, (void*)addr, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
     cprintf("allocuvm out of memory (2)\n");
@@ -209,17 +199,19 @@ int sys_mmap(void) {
     return -1;
   }
   
-  cprintf("here from mmap - i am doin okay");
+  // fd , offset , write from file to memory 
 
-  cprintf("initial mapping");
+  // cprintf("here from mmap - i am doin okay");
 
-  for(int i=0; i<32; i++) {
-    //if(curproc->mapping[i]->addr != 0) {
-      cprintf("index=%d, addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", i, (int)curproc->mapping[i]->addr,
-      curproc->mapping[i]->length, curproc->mapping[i]->prot, curproc->mapping[i]->flags,
-      curproc->mapping[i]->fd, curproc->mapping[i]->offset);
-    //}
-  }
+  // cprintf("initial mapping");
+
+  // for(int i=0; i<32; i++) {
+  //   //if(curproc->mapping[i]->addr != 0) {
+  //     cprintf("index=%d, addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", i, (int)curproc->mapping[i]->addr,
+  //     curproc->mapping[i]->length, curproc->mapping[i]->prot, curproc->mapping[i]->flags,
+  //     curproc->mapping[i]->fd, curproc->mapping[i]->offset);
+  //   //}
+  // }
 
   int idx = ++curproc->lastUsedIdx;
 
@@ -232,12 +224,29 @@ int sys_mmap(void) {
 
   cprintf("%d was changed\n", idx);
 
-  for(int i=0; i<32; i++) {
-    //if(curproc->mapping[i]->addr != NULL) {
-      cprintf("index=%d, addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", i, (int)curproc->mapping[i]->addr,
-      curproc->mapping[i]->length, curproc->mapping[i]->prot, curproc->mapping[i]->flags,
-      curproc->mapping[i]->fd, curproc->mapping[i]->offset);
-    //}
+  // for(int i=0; i<32; i++) {
+  //   //if(curproc->mapping[i]->addr != NULL) {
+  //     cprintf("index=%d, addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", i, (int)curproc->mapping[i]->addr,
+  //     curproc->mapping[i]->length, curproc->mapping[i]->prot, curproc->mapping[i]->flags,
+  //     curproc->mapping[i]->fd, curproc->mapping[i]->offset);
+  //   //}
+  // }
+
+  cprintf("addr is %d\n", addr);
+
+  if((flags & MAP_ANON) != MAP_ANON) {
+    // file backed
+    if(curproc->ofile[fd]){
+      cprintf("file exists\n");
+      int rv;
+      // int rv = filewrite(curproc->ofile[fd], (char *)addr, length);
+      // cprintf("return value of file write is %d\n", rv);
+      rv = fileread(curproc->ofile[fd], (char *)addr, length);
+      cprintf("return value of file read is %d\n", rv);
+      cprintf("read from the file is %s\n", (char *)addr);
+    } else {
+      cprintf("file doesnt exis\n"); 
+    }
   }
 
   return addr;
@@ -254,6 +263,25 @@ int sys_munmap(void) {
     return -1;
 
   struct proc *curproc = myproc();
+
+  // find the write file if there is something associated -> that means during unmap, we need to write back
+  for(int i = 0; i < 32; i++){
+        cprintf("idx = %d, addr = %d, fd = %d\n", i, curproc->mapping[i]->addr, curproc->mapping[i]->fd);
+        cprintf("last used idx = %d\n", curproc->lastUsedIdx);
+        if(i<=curproc->lastUsedIdx){
+          if((int)curproc->mapping[i]->addr == addr && curproc->mapping[i]->fd != 0) {
+            int fd = curproc->mapping[i]->fd;
+            // struct file* file = curproc->ofile[fd];
+            // file->off = 0;
+            // curproc->ofile[fd] = file;
+            //curproc->ofile[fd]->off = 0;
+            int rv;
+            rv = filewrite(curproc->ofile[fd], (char *)addr, length);
+            cprintf("return value of file write is %d\n", rv);  
+            break; 
+          }
+        }
+  }
 
   // Calculate the number of pages to remove based on the provided length.
   int pages = PGROUNDUP(length) / PGSIZE;
@@ -278,6 +306,8 @@ int sys_munmap(void) {
     *pte = 0;
 
   }
+
+  // write from buffer in memory to file 
 
   //cprintf("here from munmap - i am doin okay too");
 
