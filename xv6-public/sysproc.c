@@ -122,8 +122,9 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm, int flags)
 
   a = (char*)PGROUNDDOWN((uint)va);
   last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
-  if((flags & MAP_GROWSUP) == MAP_GROWSUP)
-    last = (char*)PGROUNDDOWN(((uint)va) + size);
+  // if((flags & MAP_GROWSUP) == MAP_GROWSUP)
+  //   last = (char*)PGROUNDDOWN(((uint)va) + size);
+  // TC 8 passed w above
   for(;;){
     if((pte = walkpgdir(pgdir, a, 1)) == 0)
       return -1;
@@ -156,11 +157,6 @@ int sys_mmap(void) {
 
   struct proc *curproc = myproc();
 
-  int guard = -1;
-  if((flags & MAP_GROWSUP) == MAP_GROWSUP) {
-    guard = addr + PGSIZE;
-  }
-
   if((flags & MAP_FIXED) != MAP_FIXED) {
     if(curproc->lastUsedIdx==-1) {
       addr = 0x60000000;
@@ -187,6 +183,12 @@ int sys_mmap(void) {
     }
   }
 
+  int guard = -1;
+  if((flags & MAP_GROWSUP) == MAP_GROWSUP) {
+    guard = addr + PGSIZE;
+    length += PGSIZE;
+  }
+
   char *mem = kalloc(); // needed for file backed as well
 
   if(mappages(curproc->pgdir, (void*)addr, PGSIZE, V2P(mem), PTE_W|PTE_U, flags) < 0){
@@ -198,7 +200,7 @@ int sys_mmap(void) {
   int idx = ++curproc->lastUsedIdx;
 
   curproc->mapping[idx]->addr=(void *)addr;
-  curproc->mapping[idx]->length=length+growsup;
+  curproc->mapping[idx]->length=length;
   curproc->mapping[idx]->prot=prot;
   curproc->mapping[idx]->flags=flags;
   curproc->mapping[idx]->fd=fd;
@@ -254,7 +256,7 @@ int sys_munmap(void) {
             if((curproc->mapping[i]->flags & MAP_SHARED) == MAP_SHARED) {
               int rv;
               cprintf("before writing\n");
-              rv = filewrite(curproc->ofile[fd], (char *)addr, length);
+              rv = filewrite(curproc->ofile[fd], (char *)addr, length); // make mapping length
               cprintf("return value of file write is %d\n", rv);  
             }
             break; 
@@ -291,7 +293,36 @@ int sys_munmap(void) {
   return 0;
 }
 
+int handlePageFault(int addr) {
+  // access the mapping , see if the addr is in the guard page of any
 
-int handlepagefault(void){
+  struct proc *curproc = myproc();
+  for(int i = 0; i<=curproc->lastUsedIdx; i++){
+    cprintf("idx = %d, addr = %d, fd = %d, guard = %d\n", i, 
+    curproc->mapping[i]->addr, curproc->mapping[i]->fd, curproc->mapping[i]->guard);
+        cprintf("last used idx = %d\n", curproc->lastUsedIdx);
+      cprintf("addr for page fault = %d \n", addr);
+        int flags = curproc->mapping[i]->flags;
+        if(i<=curproc->lastUsedIdx && (flags & MAP_GROWSUP) == MAP_GROWSUP){
+          int guard = curproc->mapping[i]->guard; // starting addr of guard page
+          if(addr >= guard && addr <= guard + PGSIZE) {
+            //if()
+            // allocate
+            char *mem = kalloc(); // needed for file backed as well
 
-} 
+            if(mappages(curproc->pgdir, (void*)guard, PGSIZE, V2P(mem), PTE_W|PTE_U, flags) < 0){
+              cprintf("allocuvm out of memory (2)\n");
+              kfree(mem);
+              return -1;
+            }
+
+            if(i+1<=curproc->lastUsedIdx && (int)curproc->mapping[i+1]->addr > guard+2*PGSIZE)
+              curproc->mapping[i]->guard = guard+PGSIZE;
+
+            return 0; // says that the trap is handled , should pass normally
+          }
+        }
+  }
+  cprintf("here from the handler\n");
+  return -1;
+}

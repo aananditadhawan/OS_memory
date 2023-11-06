@@ -13,6 +13,7 @@ struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
+const int fault = 1;
 
 void
 tvinit(void)
@@ -46,6 +47,8 @@ trap(struct trapframe *tf)
     return;
   }
 
+  //const int rv = handlePageFault(rcr2());
+
   switch(tf->trapno){
   case T_IRQ0 + IRQ_TIMER:
     if(cpuid() == 0){
@@ -77,22 +80,53 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
+  case T_SEGNP:
+    cprintf("seg fault");
+  case T_PGFLT: // && fault==1:
+    //int fault = 0; //handlePageFault();
+    // if(fault == 1) {
+    //   cprintf("page fault trap");
+    //   break;
+    // }
+    int rv = handlePageFault(rcr2());
+    if(rv==0) return;
+    cprintf("here in page fault trap %d , return value = %d \n", rcr2(), rv);
+    if(rv==-1) {
+    //   cprintf("here here\n");
+    //   if(myproc() == 0 || (tf->cs&3) == 0){
+    //   // In kernel, it must be our mistake.
+    //   cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",
+    //           tf->trapno, cpuid(), tf->eip, rcr2());
+    //   panic("trap");
+    // }
+    // // In user space, assume process misbehaved.
+    // cprintf("pid %d %s: trap %d err %d on cpu %d "
+    //         "eip 0x%x addr 0x%x--kill proc\n",
+    //         myproc()->pid, myproc()->name, tf->trapno,
+    //         tf->err, cpuid(), tf->eip, rcr2());
+    // myproc()->killed = 1;
+      goto GOTOBLOCK;
+      break;
+    }
+      
+    break;
 
   //PAGEBREAK: 13
-  default:
-    if(myproc() == 0 || (tf->cs&3) == 0){
-      // In kernel, it must be our mistake.
-      cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",
-              tf->trapno, cpuid(), tf->eip, rcr2());
-      panic("trap");
+  GOTOBLOCK:
+    default:
+      if(myproc() == 0 || (tf->cs&3) == 0){
+        // In kernel, it must be our mistake.
+        cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",
+                tf->trapno, cpuid(), tf->eip, rcr2());
+        panic("trap");
+      }
+      // In user space, assume process misbehaved.
+      cprintf("pid %d %s: trap %d err %d on cpu %d "
+              "eip 0x%x addr 0x%x--kill proc\n",
+              myproc()->pid, myproc()->name, tf->trapno,
+              tf->err, cpuid(), tf->eip, rcr2());
+      myproc()->killed = 1;
     }
-    // In user space, assume process misbehaved.
-    cprintf("pid %d %s: trap %d err %d on cpu %d "
-            "eip 0x%x addr 0x%x--kill proc\n",
-            myproc()->pid, myproc()->name, tf->trapno,
-            tf->err, cpuid(), tf->eip, rcr2());
-    myproc()->killed = 1;
-  }
 
   // Force process exit if it has been killed and is in user space.
   // (If it is still executing in the kernel, let it keep running
