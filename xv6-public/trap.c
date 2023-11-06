@@ -105,14 +105,15 @@ trap(struct trapframe *tf)
     //         myproc()->pid, myproc()->name, tf->trapno,
     //         tf->err, cpuid(), tf->eip, rcr2());
     // myproc()->killed = 1;
-      goto GOTOBLOCK;
-      break;
+      //goto GOTOBLOCK;
+      cprintf("Segmentation Fault\n");
+      exit();
     }
       
     break;
 
   //PAGEBREAK: 13
-  GOTOBLOCK:
+  //GOTOBLOCK:
     default:
       if(myproc() == 0 || (tf->cs&3) == 0){
         // In kernel, it must be our mistake.
