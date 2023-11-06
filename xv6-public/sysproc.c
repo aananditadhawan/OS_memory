@@ -147,30 +147,22 @@ int sys_mmap(void) {
   0)
     return -1;
 
-  if((flags & MAP_GROWSUP) == MAP_GROWSUP)
-    length += PGSIZE;
-
   cprintf("what did we get ? addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", 
   addr, length, prot, flags, fd, offset);
 
-  // if((flags & (MAP_ANONYMOUS | MAP_FIXED | MAP_SHARED)) != (MAP_ANONYMOUS | MAP_FIXED | MAP_SHARED))
-  //   return -1;
 
   if((addr < 0x60000000 || addr > 0x80000000) && (flags & MAP_FIXED) == MAP_FIXED)
-    //return (void*)-1;
     return -1;
-
-  //int pages = PGROUNDUP(length);
 
   struct proc *curproc = myproc();
 
+  int guard = -1;
+  if((flags & MAP_GROWSUP) == MAP_GROWSUP) {
+    guard = addr + PGSIZE;
+  }
+
   if((flags & MAP_FIXED) != MAP_FIXED) {
-    //addr = 0x60000000; // check an empty space from the mapping here
-    //int chosenIdx = -1;
-    //if(((int)curproc->mapping[0]->addr - 0x60000000) > length){
     if(curproc->lastUsedIdx==-1) {
-      // map at the beginning
-      //chosenIdx = ++curproc->lastUsedIdx;
       addr = 0x60000000;
     } else{
       for(int i = 0; i < 32; i++){
@@ -184,7 +176,6 @@ int sys_mmap(void) {
           
           int dif = (int)curproc->mapping[i+1]->addr - length;
           if(dif > straddr){
-	    // map
             //chosenIdx=++curproc->lastUsedIdx;
             addr = straddr;
             break;
@@ -203,37 +194,18 @@ int sys_mmap(void) {
     kfree(mem);
     return -1;
   }
-  
-  // fd , offset , write from file to memory 
-  // cprintf("initial mapping");
-
-  // for(int i=0; i<32; i++) {
-  //   //if(curproc->mapping[i]->addr != 0) {
-  //     cprintf("index=%d, addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", i, (int)curproc->mapping[i]->addr,
-  //     curproc->mapping[i]->length, curproc->mapping[i]->prot, curproc->mapping[i]->flags,
-  //     curproc->mapping[i]->fd, curproc->mapping[i]->offset);
-  //   //}
-  // }
 
   int idx = ++curproc->lastUsedIdx;
 
   curproc->mapping[idx]->addr=(void *)addr;
-  curproc->mapping[idx]->length=length;
+  curproc->mapping[idx]->length=length+growsup;
   curproc->mapping[idx]->prot=prot;
   curproc->mapping[idx]->flags=flags;
   curproc->mapping[idx]->fd=fd;
   curproc->mapping[idx]->offset=offset;
+  curproc->mapping[idx]->guard=guard;
 
   cprintf("%d was changed\n", idx);
-
-  // for(int i=0; i<32; i++) {
-  //   //if(curproc->mapping[i]->addr != NULL) {
-  //     cprintf("index=%d, addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", i, (int)curproc->mapping[i]->addr,
-  //     curproc->mapping[i]->length, curproc->mapping[i]->prot, curproc->mapping[i]->flags,
-  //     curproc->mapping[i]->fd, curproc->mapping[i]->offset);
-  //   //}
-  // }
-
   cprintf("addr is %d\n", addr);
 
   if((flags & MAP_ANON) != MAP_ANON) {
@@ -316,10 +288,10 @@ int sys_munmap(void) {
 
   }
 
-  // write from buffer in memory to file 
-
-  //cprintf("here from munmap - i am doin okay too");
-
   return 0;
 }
 
+
+int handlepagefault(void){
+
+} 

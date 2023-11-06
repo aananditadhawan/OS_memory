@@ -17,4 +17,5 @@ struct map {
     int flags; 
     int fd;
     int offset;
+    int guard;
 };
