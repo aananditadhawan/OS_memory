@@ -206,6 +206,7 @@ int sys_mmap(void) {
   curproc->mapping[idx]->fd=fd;
   curproc->mapping[idx]->offset=offset;
   curproc->mapping[idx]->guard=guard;
+  curproc->mapping[idx]->pid = curproc->pid;
 
   cprintf("%d was changed\n", idx);
   cprintf("addr is %d\n", addr);
@@ -215,8 +216,6 @@ int sys_mmap(void) {
     if(curproc->ofile[fd]){
       cprintf("file exists\n");
       int rv;
-      // int rv = filewrite(curproc->ofile[fd], (char *)addr, length);
-      // cprintf("return value of file write is %d\n", rv);
       rv = fileread(curproc->ofile[fd], (char *)addr, length);
       cprintf("return value of file read is %d\n", rv);
       cprintf("read from the file is %s\n", (char *)addr);
@@ -224,6 +223,8 @@ int sys_mmap(void) {
       cprintf("file doesnt exis\n"); 
     }
   }
+
+  curproc->mapping[idx]->physicalM = mem;
 
   cprintf("here from mmap - i am doin okay");
 
@@ -297,16 +298,46 @@ int handlePageFault(int addr) {
   // access the mapping , see if the addr is in the guard page of any
 
   struct proc *curproc = myproc();
-
-  if(curproc->pid == 0) {
-    return 0;
-  }
+  cprintf("last used idx = %d\n", curproc->lastUsedIdx);
+  if(curproc->lastUsedIdx == -1)
+  curproc->lastUsedIdx=0;
 
   for(int i = 0; i<=curproc->lastUsedIdx; i++){
     cprintf("idx = %d, addr = %d, fd = %d, guard = %d\n", i, 
     curproc->mapping[i]->addr, curproc->mapping[i]->fd, curproc->mapping[i]->guard);
         cprintf("last used idx = %d\n", curproc->lastUsedIdx);
       cprintf("addr for page fault = %d \n", addr);
+        // cprintf("curproc->mapping[i]->acquired = %d\n", curproc->mapping[i]->acquired);
+        // if(curproc->mapping[i]->acquired == 1)
+          //return 0;
+        if(curproc->mapping[i]->pid != curproc->pid) {
+          cprintf("pid mismatch happened\n");
+          int flags = curproc->mapping[i]->flags;
+          // int length = curproc->mapping[i]->length;
+          // int fd = curproc->mapping[i]->fd;
+    
+          //char *mem = kalloc(); // needed for file backed as well
+          char *mem;
+
+          if((flags & MAP_PRIVATE) == MAP_PRIVATE) {
+            // get from buffer
+            mem = kalloc();
+            //memmove(mem, curproc->mapping[i]->buff, PGSIZE); // change from buff to physical mem
+            memmove(mem, curproc->mapping[i]->physicalM, PGSIZE);
+          } else {
+            mem = curproc->mapping[i]->physicalM; // copy parent's address directly
+          }
+            if(mappages(curproc->pgdir, (void*)curproc->mapping[i]->addr, PGSIZE, V2P(mem), PTE_W|PTE_U, 
+            curproc->mapping[i]->flags) < 0){
+              cprintf("allocuvm out of memory (2)\n");
+              kfree(mem);
+              cprintf("i returned -1\n");
+              return -1;
+            }
+
+          cprintf("i reached end and returned 0\n");
+          return 0;
+        }
         int flags = curproc->mapping[i]->flags;
         if(i<=curproc->lastUsedIdx && (flags & MAP_GROWSUP) == MAP_GROWSUP){
           int guard = curproc->mapping[i]->guard; // starting addr of guard page
@@ -318,16 +349,17 @@ int handlePageFault(int addr) {
             if(mappages(curproc->pgdir, (void*)guard, PGSIZE, V2P(mem), PTE_W|PTE_U, flags) < 0){
               cprintf("allocuvm out of memory (2)\n");
               kfree(mem);
+              cprintf("i returned -1 2\n");
               return -1;
             }
 
             if(i+1<=curproc->lastUsedIdx && (int)curproc->mapping[i+1]->addr > guard+2*PGSIZE)
               curproc->mapping[i]->guard = guard+PGSIZE;
-
+            cprintf("i reached end and returned 0\n");
             return 0; // says that the trap is handled , should pass normally
           }
         }
   }
-  cprintf("here from the handler\n");
+  cprintf("here from the handler 2\n");
   return -1;
 }

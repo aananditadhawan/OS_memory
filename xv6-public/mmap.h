@@ -20,5 +20,8 @@ struct map {
     int guard;
     // int childStart;
     // int childEnd;
-    int acquired;
+    //int acquired;
+    int pid;
+    char *physicalM;
+    //char *buff;
 };

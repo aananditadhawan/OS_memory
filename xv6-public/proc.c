@@ -89,6 +89,7 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   p->lastUsedIdx = -1;
+  //p->mapping[0]->acquired = 0;
 
   release(&ptable.lock);
 
@@ -182,6 +183,9 @@ growproc(int n)
 int
 fork(void)
 {
+
+  cprintf("hello from fork\n");
+
   int i, pid;
   struct proc *np;
   struct proc *curproc = myproc();
@@ -212,10 +216,13 @@ fork(void)
 
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
-  // Copy mmap entries
+    // Copy mmap entries
   for(i = 0; i < 32; i++) {
     if(i<=curproc->lastUsedIdx && curproc->mapping[i]->addr != 0 && (curproc->mapping[i]->flags & MAP_SHARED) == MAP_SHARED) {
       np->mapping[i] = curproc->mapping[i];
+      //np->mapping[i]->acquired = 1;
+      np->lastUsedIdx = curproc->lastUsedIdx;
+      cprintf("im here in fork\n");
       //np->ref_cnt++;
     }
   }
@@ -227,6 +234,8 @@ fork(void)
   np->state = RUNNABLE;
 
   release(&ptable.lock);
+
+  curproc->child = np;
 
   return pid;
 }
@@ -266,7 +275,6 @@ exit(void)
   if(curproc == initproc)
     panic("init exiting");
 
-  // Close all open files.
   for(fd = 0; fd < NOFILE; fd++){
     if(curproc->ofile[fd]){
       fileclose(curproc->ofile[fd]);

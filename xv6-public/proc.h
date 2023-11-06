@@ -54,7 +54,7 @@ struct proc {
   char name[16];               // Process name (debugging)
   struct map *mapping[32];     // Mapping for the memory page table
   int lastUsedIdx;             // Last index for mapping
-  //struct proc *child;          // Child's mapping
+  struct proc *child;          // Child's mapping
 };
 
 // Process memory is laid out contiguously, low addresses first:
