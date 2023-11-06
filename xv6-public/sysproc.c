@@ -122,9 +122,6 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm, int flags)
 
   a = (char*)PGROUNDDOWN((uint)va);
   last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
-  // if((flags & MAP_GROWSUP) == MAP_GROWSUP)
-  //   last = (char*)PGROUNDDOWN(((uint)va) + size);
-  // TC 8 passed w above
   for(;;){
     if((pte = walkpgdir(pgdir, a, 1)) == 0)
       return -1;
@@ -148,10 +145,6 @@ int sys_mmap(void) {
   0)
     return -1;
 
-  cprintf("what did we get ? addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", 
-  addr, length, prot, flags, fd, offset);
-
-
   if((addr < 0x60000000 || addr > 0x80000000) && (flags & MAP_FIXED) == MAP_FIXED)
     return -1;
 
@@ -165,14 +158,12 @@ int sys_mmap(void) {
         if(i<curproc->lastUsedIdx){
           int straddr = (int)curproc->mapping[i]->addr + curproc->mapping[i]->length;
           if(i==curproc->lastUsedIdx) {
-            //chosenIdx=++curproc->lastUsedIdx;
             addr=straddr;
             break;
           }
           
           int dif = (int)curproc->mapping[i+1]->addr - length;
           if(dif > straddr){
-            //chosenIdx=++curproc->lastUsedIdx;
             addr = straddr;
             break;
 	      }
@@ -208,25 +199,13 @@ int sys_mmap(void) {
   curproc->mapping[idx]->guard=guard;
   curproc->mapping[idx]->pid = curproc->pid;
 
-  cprintf("%d was changed\n", idx);
-  cprintf("addr is %d\n", addr);
-
   if((flags & MAP_ANON) != MAP_ANON) {
     // file backed
-    if(curproc->ofile[fd]){
-      cprintf("file exists\n");
-      int rv;
-      rv = fileread(curproc->ofile[fd], (char *)addr, length);
-      cprintf("return value of file read is %d\n", rv);
-      cprintf("read from the file is %s\n", (char *)addr);
-    } else {
-      cprintf("file doesnt exis\n"); 
-    }
+    if(curproc->ofile[fd])
+      fileread(curproc->ofile[fd], (char *)addr, length);
   }
 
   curproc->mapping[idx]->physicalM = mem;
-
-  cprintf("here from mmap - i am doin okay");
 
   return addr;
 }
@@ -245,27 +224,16 @@ int sys_munmap(void) {
 
   // find the write file if there is something associated -> that means during unmap, we need to write back
   for(int i = 0; i < 32; i++){
-        cprintf("idx = %d, addr = %d, fd = %d\n", i, curproc->mapping[i]->addr, curproc->mapping[i]->fd);
-        cprintf("last used idx = %d\n", curproc->lastUsedIdx);
         if(i<=curproc->lastUsedIdx){
           if((int)curproc->mapping[i]->addr == addr && curproc->mapping[i]->fd != 0) {
             int fd = curproc->mapping[i]->fd;
-            // struct file* file = curproc->ofile[fd];
-            // file->off = 0;
-            // curproc->ofile[fd] = file;
-            //curproc->ofile[fd]->off = 0;
-            if((curproc->mapping[i]->flags & MAP_SHARED) == MAP_SHARED) {
-              int rv;
-              cprintf("before writing\n");
-              rv = filewrite(curproc->ofile[fd], (char *)addr, length); // make mapping length
-              cprintf("return value of file write is %d\n", rv);  
-            }
+
+            if((curproc->mapping[i]->flags & MAP_SHARED) == MAP_SHARED)
+              filewrite(curproc->ofile[fd], (char *)addr, length); // make mapping length
             break; 
           }
         }
   }
-
-  cprintf("out of if\n");
 
   // Calculate the number of pages to remove based on the provided length.
   int pages = PGROUNDUP(length) / PGSIZE + 1;
@@ -298,68 +266,48 @@ int handlePageFault(int addr) {
   // access the mapping , see if the addr is in the guard page of any
 
   struct proc *curproc = myproc();
-  cprintf("last used idx = %d\n", curproc->lastUsedIdx);
   if(curproc->lastUsedIdx == -1)
   curproc->lastUsedIdx=0;
 
   for(int i = 0; i<=curproc->lastUsedIdx; i++){
-    cprintf("idx = %d, addr = %d, fd = %d, guard = %d\n", i, 
-    curproc->mapping[i]->addr, curproc->mapping[i]->fd, curproc->mapping[i]->guard);
-        cprintf("last used idx = %d\n", curproc->lastUsedIdx);
-      cprintf("addr for page fault = %d \n", addr);
-        // cprintf("curproc->mapping[i]->acquired = %d\n", curproc->mapping[i]->acquired);
-        // if(curproc->mapping[i]->acquired == 1)
-          //return 0;
+
         if(curproc->mapping[i]->pid != curproc->pid) {
-          cprintf("pid mismatch happened\n");
           int flags = curproc->mapping[i]->flags;
-          // int length = curproc->mapping[i]->length;
-          // int fd = curproc->mapping[i]->fd;
-    
-          //char *mem = kalloc(); // needed for file backed as well
+
           char *mem;
 
           if((flags & MAP_PRIVATE) == MAP_PRIVATE) {
             // get from buffer
             mem = kalloc();
-            //memmove(mem, curproc->mapping[i]->buff, PGSIZE); // change from buff to physical mem
             memmove(mem, curproc->mapping[i]->physicalM, PGSIZE);
           } else {
             mem = curproc->mapping[i]->physicalM; // copy parent's address directly
           }
             if(mappages(curproc->pgdir, (void*)curproc->mapping[i]->addr, PGSIZE, V2P(mem), PTE_W|PTE_U, 
             curproc->mapping[i]->flags) < 0){
-              cprintf("allocuvm out of memory (2)\n");
               kfree(mem);
-              cprintf("i returned -1\n");
               return -1;
             }
 
-          cprintf("i reached end and returned 0\n");
           return 0;
         }
         int flags = curproc->mapping[i]->flags;
         if(i<=curproc->lastUsedIdx && (flags & MAP_GROWSUP) == MAP_GROWSUP){
           int guard = curproc->mapping[i]->guard; // starting addr of guard page
           if(addr >= guard && addr <= guard + PGSIZE) {
-            //if()
             // allocate
             char *mem = kalloc(); // needed for file backed as well
 
             if(mappages(curproc->pgdir, (void*)guard, PGSIZE, V2P(mem), PTE_W|PTE_U, flags) < 0){
-              cprintf("allocuvm out of memory (2)\n");
               kfree(mem);
-              cprintf("i returned -1 2\n");
               return -1;
             }
 
             if(i+1<=curproc->lastUsedIdx && (int)curproc->mapping[i+1]->addr > guard+2*PGSIZE)
               curproc->mapping[i]->guard = guard+PGSIZE;
-            cprintf("i reached end and returned 0\n");
             return 0; // says that the trap is handled , should pass normally
           }
         }
   }
-  cprintf("here from the handler 2\n");
   return -1;
 }
