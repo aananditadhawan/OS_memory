@@ -115,13 +115,15 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
 }
 
 static int
-mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
+mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm, int flags)
 {
   char *a, *last;
   pte_t *pte;
 
   a = (char*)PGROUNDDOWN((uint)va);
   last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
+  if((flags & MAP_GROWSUP) == MAP_GROWSUP)
+    last = (char*)PGROUNDDOWN(((uint)va) + size);
   for(;;){
     if((pte = walkpgdir(pgdir, a, 1)) == 0)
       return -1;
@@ -144,6 +146,9 @@ int sys_mmap(void) {
   argint(3, &flags) < 0 || argint(4, &fd) < 0 || argint(5, &offset) < 
   0)
     return -1;
+
+  if((flags & MAP_GROWSUP) == MAP_GROWSUP)
+    length += PGSIZE;
 
   cprintf("what did we get ? addr=%d, length=%d, prot=%d, flags=%d, fd=%d, offset=%d \n", 
   addr, length, prot, flags, fd, offset);
@@ -193,16 +198,13 @@ int sys_mmap(void) {
 
   char *mem = kalloc(); // needed for file backed as well
 
-  if(mappages(curproc->pgdir, (void*)addr, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
+  if(mappages(curproc->pgdir, (void*)addr, PGSIZE, V2P(mem), PTE_W|PTE_U, flags) < 0){
     cprintf("allocuvm out of memory (2)\n");
     kfree(mem);
     return -1;
   }
   
   // fd , offset , write from file to memory 
-
-  // cprintf("here from mmap - i am doin okay");
-
   // cprintf("initial mapping");
 
   // for(int i=0; i<32; i++) {
@@ -249,6 +251,8 @@ int sys_mmap(void) {
     }
   }
 
+  cprintf("here from mmap - i am doin okay");
+
   return addr;
 }
 
@@ -277,6 +281,7 @@ int sys_munmap(void) {
             //curproc->ofile[fd]->off = 0;
             if((curproc->mapping[i]->flags & MAP_SHARED) == MAP_SHARED) {
               int rv;
+              cprintf("before writing\n");
               rv = filewrite(curproc->ofile[fd], (char *)addr, length);
               cprintf("return value of file write is %d\n", rv);  
             }
@@ -285,8 +290,10 @@ int sys_munmap(void) {
         }
   }
 
+  cprintf("out of if\n");
+
   // Calculate the number of pages to remove based on the provided length.
-  int pages = PGROUNDUP(length) / PGSIZE;
+  int pages = PGROUNDUP(length) / PGSIZE + 1;
 
   for(int i = 0; i < pages; i++) {
     char* va = (char*)(addr + i*PGSIZE);

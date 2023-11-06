@@ -293,7 +293,7 @@ exit(void)
     }
   }
 
-  // Unmap everything basically
+  // Unmap everything basically 
   curproc->lastUsedIdx = -1;
 
   // Jump into the scheduler, never to return.

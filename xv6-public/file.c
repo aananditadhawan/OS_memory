@@ -107,6 +107,7 @@ fileread(struct file *f, char *addr, int n)
     if((r = readi(f->ip, addr, f->off, n)) > 0)
       f->off += r;
     iunlock(f->ip);
+    //cprintf("f->off = %d\n", f->off);
     return r;
   }
   panic("fileread");
