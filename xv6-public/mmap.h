@@ -18,4 +18,7 @@ struct map {
     int fd;
     int offset;
     int guard;
+    // int childStart;
+    // int childEnd;
+    int acquired;
 };

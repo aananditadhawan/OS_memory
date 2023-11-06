@@ -80,8 +80,6 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
-  case T_SEGNP:
-    cprintf("seg fault");
   case T_PGFLT: // && fault==1:
     //int fault = 0; //handlePageFault();
     // if(fault == 1) {
@@ -107,7 +105,8 @@ trap(struct trapframe *tf)
     // myproc()->killed = 1;
       //goto GOTOBLOCK;
       cprintf("Segmentation Fault\n");
-      exit();
+      //exit();
+      return;
     }
       
     break;

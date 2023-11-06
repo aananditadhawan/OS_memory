@@ -297,6 +297,11 @@ int handlePageFault(int addr) {
   // access the mapping , see if the addr is in the guard page of any
 
   struct proc *curproc = myproc();
+
+  if(curproc->pid == 0) {
+    return 0;
+  }
+
   for(int i = 0; i<=curproc->lastUsedIdx; i++){
     cprintf("idx = %d, addr = %d, fd = %d, guard = %d\n", i, 
     curproc->mapping[i]->addr, curproc->mapping[i]->fd, curproc->mapping[i]->guard);
